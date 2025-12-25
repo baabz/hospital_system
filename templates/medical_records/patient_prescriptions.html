@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ patient.get_full_name }} - Prescriptions - Galbose Hospital{% endblock %}
+{% block page_title %}Patient Prescriptions{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h3 class="card-title">Prescriptions for {{ patient.get_full_name }}</h3>
+            <p class="text-muted" style="margin: 0;">Patient ID: <strong>{{ patient.patient_id }}</strong></p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'medical_records:prescription_create_for_patient' patient.patient_id %}" class="btn btn-success">➕ New Prescription</a>
+            <a href="{% url 'patients:patient_detail' patient.patient_id %}" class="btn btn-secondary">← Back to Patient</a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        {% if prescriptions %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Doctor</th>
+                        <th>Diagnosis</th>
+                        <th>Status</th>
+                        <th>Items</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescription in prescriptions %}
+                    <tr>
+                        <td>
+                            <strong>{{ prescription.prescription_date|date:"M d, Y" }}</strong><br>
+                            <small class="text-muted">{{ prescription.prescription_date|time:"H:i" }}</small>
+                        </td>
+                        <td>{{ prescription.doctor.get_full_name }}</td>
+                        <td>
+                            <div style="max-width: 250px; word-wrap: break-word;">
+                                {{ prescription.diagnosis|truncatewords:15 }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{% if prescription.is_dispensed %}success{% else %}warning{% endif %}">
+                                {% if prescription.is_dispensed %}
+                                    ✓ Dispensed
+                                {% else %}
+                                    ⏳ Pending
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-info">{{ prescription.items.count }} item(s)</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'medical_records:prescription_detail' prescription.pk %}" class="btn btn-sm btn-primary">👁️ View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <strong>No prescriptions found</strong> for this patient. 
+            <a href="{% url 'medical_records:prescription_create_for_patient' patient.patient_id %}">Create a new prescription</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Pharmacy - Galbose Hospital{% endblock %}
+{% block page_title %}Pharmacy Inventory{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Medication Inventory</h3>
+        <a href="#" class="btn btn-primary">➕ Add Medication</a>
+    </div>
+
+    <div class="card-body">
+        <!-- Search and Filter Section -->
+        <form method="get" class="mb-2">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; margin-bottom: 1.5rem;">
+                <!-- Search Box -->
+                <div>
+                    <input type="text" name="search" class="form-control"
+                        placeholder="🔍 Search by name, generic name, or manufacturer..." value="{{ search_query }}"
+                        style="padding: 0.75rem 1rem;">
+                </div>
+
+                <!-- Category Filter -->
+                <div>
+                    <select name="category" class="form-control">
+                        <option value="">All Categories</option>
+                        {% for value, label in categories %}
+                        <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Stock Filter -->
+                <div>
+                    <select name="stock" class="form-control">
+                        <option value="">All Stock Levels</option>
+                        <option value="low" {% if stock_filter == 'low' %}selected{% endif %}>Low Stock Only</option>
+                        <option value="out" {% if stock_filter == 'out' %}selected{% endif %}>Out of Stock</option>
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    {% if search_query or category_filter or stock_filter %}
+                    <a href="{% url 'pharmacy:medication_list' %}" class="btn btn-secondary">Clear</a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+
+        <!-- Search Results Info -->
+        {% if search_query or category_filter or stock_filter %}
+        <div style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(59, 130, 246, 0.1); border-radius: var(--radius-md); border-left: 3px solid var(--info);">
+            <strong>Search Results:</strong>
+            {{ medications.count }} medication(s) found
+            {% if search_query %}for "{{ search_query }}"{% endif %}
+            {% if category_filter %}in {{ category_filter }}{% endif %}
+            {% if stock_filter == 'low' %}with low stock{% elif stock_filter == 'out' %}out of stock{% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Low Stock Alert -->
+        {% if low_stock_count > 0 %}
+        <div class="alert alert-warning">
+            <strong>⚠️ Low Stock Alert:</strong> {{ low_stock_count }} medication(s) are running low on stock!
+        </div>
+        {% endif %}
+
+        <!-- Medications Table -->
+        {% if medications %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Medication Name</th>
+                        <th>Generic Name</th>
+                        <th>Category</th>
+                        <th>Dosage</th>
+                        <th>Stock</th>
+                        <th>Reorder Level</th>
+                        <th>Unit Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medication in medications %}
+                    <tr {% if medication.is_low_stock %}style="background: rgba(239, 68, 68, 0.05);"{% endif %}>
+                        <td>
+                            <strong>{{ medication.name }}</strong>
+                            {% if medication.manufacturer %}
+                            <br><small class="text-muted">{{ medication.manufacturer }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ medication.generic_name|default:"—" }}</td>
+                        <td><span class="badge badge-info">{{ medication.get_category_display }}</span></td>
+                        <td>{{ medication.dosage_form|default:"—" }}</td>
+                        <td>
+                            <strong {% if medication.quantity_in_stock == 0 %}style="color: var(--danger);" {% elif medication.is_low_stock %}style="color: var(--warning);" {% endif %}>
+                                {{ medication.quantity_in_stock }} units
+                            </strong>
+                        </td>
+                        <td>{{ medication.reorder_level }}</td>
+                        <td>₦{{ medication.unit_price|floatformat:2 }}</td>
+                        <td>
+                            {% if medication.quantity_in_stock == 0 %}
+                            <span class="badge badge-danger">Out of Stock</span>
+                            {% elif medication.is_low_stock %}
+                            <span class="badge badge-warning">⚠️ Low Stock</span>
+                            {% elif medication.is_expired %}
+                            <span class="badge badge-danger">Expired</span>
+                            {% else %}
+                            <span class="badge badge-success">In Stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Results Summary -->
+        <div style="margin-top: 1rem; padding: 0.75rem; background: var(--gray-50); border-radius: var(--radius-md);">
+            <strong>Total:</strong> {{ medications.count }} medication(s) displayed
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            {% if search_query or category_filter or stock_filter %}
+                No medications found matching your search criteria. Try adjusting your filters.
+            {% else %}
+                No medications in inventory.
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

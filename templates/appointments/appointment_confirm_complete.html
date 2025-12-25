@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Complete Appointment - Galbose Hospital{% endblock %}
+{% block page_title %}Complete Appointment{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Confirm Completion</h3>
+        <a href="{% url 'appointments:appointment_list' %}" class="btn btn-secondary">← Back</a>
+    </div>
+
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <strong>Are you sure you want to mark this appointment as completed?</strong>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Patient:</label>
+                <span>{{ appointment.patient.get_full_name }}</span>
+            </div>
+            <div class="info-item">
+                <label>Doctor:</label>
+                <span>{{ appointment.doctor.get_full_name|default:"Unassigned" }}</span>
+            </div>
+            <div class="info-item">
+                <label>Date & Time:</label>
+                <span>
+                    {% if appointment.appointment_datetime %}
+                    {{ appointment.appointment_datetime|date:"M d, Y" }} at {{
+                    appointment.appointment_datetime|time:"H:i" }}
+                    {% else %}
+                    {{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"H:i" }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <label>Reason:</label>
+                <span>{{ appointment.reason }}</span>
+            </div>
+            <div class="info-item">
+                <label>Current Status:</label>
+                <span class="badge badge-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+            </div>
+        </div>
+
+        <form method="post" style="margin-top: 2rem;">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary btn-lg">✓ Yes, Mark as Completed</button>
+                <a href="{% url 'appointments:appointment_list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

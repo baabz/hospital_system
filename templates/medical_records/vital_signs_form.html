@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Vital Signs - Galbose Hospital{% endblock %}
+{% block page_title %}Record Vital Signs{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">📊 Vital Signs - {{ visit.patient.get_full_name }}</h3>
+        <a href="{% url 'patients:patient_detail' visit.patient.patient_id %}" class="btn btn-secondary">← Back</a>
+    </div>
+
+    <div class="card-body">
+        <!-- Patient Info -->
+        <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+            <strong>Patient:</strong> {{ visit.patient.get_full_name }} ({{ visit.patient.patient_id }})<br>
+            <strong>Age:</strong> {{ visit.patient.age }} years | <strong>Gender:</strong> {{
+            visit.patient.get_gender_display }}<br>
+            <strong>Visit Date:</strong> {{ visit.visit_date|date:"M d, Y H:i" }}<br>
+            <strong>Reason:</strong> {{ visit.reason }}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <h4 style="margin-bottom: 1rem; color: #1976d2;">🌡️ Vital Signs</h4>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <!-- Temperature -->
+                <div class="form-group">
+                    <label class="form-label">{{ form.temperature.label }}</label>
+                    {{ form.temperature }}
+                    <small class="text-muted">Normal: 36.5-37.5°C</small>
+                    {% if form.temperature.errors %}
+                    <div class="text-danger">{{ form.temperature.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Blood Pressure -->
+                <div class="form-group">
+                    <label class="form-label">Blood Pressure (mmHg)</label>
+                    <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; align-items: center;">
+                        {{ form.blood_pressure_systolic }}
+                        <span style="font-weight: bold;">/</span>
+                        {{ form.blood_pressure_diastolic }}
+                    </div>
+                    <small class="text-muted">Normal: 120/80 mmHg</small>
+                    {% if form.blood_pressure_systolic.errors or form.blood_pressure_diastolic.errors %}
+                    <div class="text-danger">{{ form.blood_pressure_systolic.errors }} {{
+                        form.blood_pressure_diastolic.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Pulse Rate -->
+                <div class="form-group">
+                    <label class="form-label">{{ form.pulse_rate.label }}</label>
+                    {{ form.pulse_rate }}
+                    <small class="text-muted">Normal: 60-100 bpm</small>
+                    {% if form.pulse_rate.errors %}
+                    <div class="text-danger">{{ form.pulse_rate.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Respiratory Rate -->
+                <div class="form-group">
+                    <label class="form-label">{{ form.respiratory_rate.label }}</label>
+                    {{ form.respiratory_rate }}
+                    <small class="text-muted">Normal: 12-20 breaths/min</small>
+                    {% if form.respiratory_rate.errors %}
+                    <div class="text-danger">{{ form.respiratory_rate.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Weight -->
+                <div class="form-group">
+                    <label class="form-label">{{ form.weight.label }}</label>
+                    {{ form.weight }}
+                    {% if form.weight.errors %}
+                    <div class="text-danger">{{ form.weight.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Height -->
+                <div class="form-group">
+                    <label class="form-label">{{ form.height.label }}</label>
+                    {{ form.height }}
+                    {% if form.height.errors %}
+                    <div class="text-danger">{{ form.height.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Oxygen Saturation -->
+                <div class="form-group">
+                    <label class="form-label">{{ form.oxygen_saturation.label }}</label>
+                    {{ form.oxygen_saturation }}
+                    <small class="text-muted">Normal: 95-100%</small>
+                    {% if form.oxygen_saturation.errors %}
+                    <div class="text-danger">{{ form.oxygen_saturation.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if visit.weight and visit.height %}
+            <div class="alert alert-success" style="margin-top: 1rem;">
+                <strong>BMI:</strong> {{ visit.get_bmi }} kg/m²
+            </div>
+            {% endif %}
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary btn-lg">💾 Save Vital Signs</button>
+                <a href="{% url 'patients:patient_detail' visit.patient.patient_id %}"
+                    class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

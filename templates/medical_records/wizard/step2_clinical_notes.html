@@ -1,0 +1,68 @@
+{% extends 'medical_records/wizard/base_wizard.html' %}
+
+{% block wizard_content %}
+<h4 style="color: #667eea; margin-bottom: 1.5rem;">📋 Step 2: Clinical Assessment</h4>
+
+{% if visit.has_vital_signs %}
+<div class="alert alert-info" style="margin-bottom: 1.5rem;">
+    <strong>Vital Signs Recorded:</strong>
+    {% if visit.temperature %}Temp: {{ visit.temperature }}°C{% endif %}
+    {% if visit.get_blood_pressure %} | BP: {{ visit.get_blood_pressure }} mmHg{% endif %}
+    {% if visit.pulse_rate %} | Pulse: {{ visit.pulse_rate }} bpm{% endif %}
+    {% if visit.oxygen_saturation %} | SpO2: {{ visit.oxygen_saturation }}%{% endif %}
+</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+
+    <!-- Presenting Complaint -->
+    <div class="form-group">
+        <label class="form-label"><strong>{{ form.presenting_complaint.label }}</strong> *</label>
+        {{ form.presenting_complaint }}
+        <small class="text-muted">Document the chief complaint and detailed history of presenting illness</small>
+        {% if form.presenting_complaint.errors %}
+        <div class="text-danger">{{ form.presenting_complaint.errors }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Past Medical History -->
+    <div class="form-group">
+        <label class="form-label"><strong>{{ form.past_medical_history.label }}</strong></label>
+        {{ form.past_medical_history }}
+        <small class="text-muted">Relevant past medical history, previous surgeries, chronic conditions</small>
+    </div>
+
+    <!-- Examination Findings -->
+    <div class="form-group">
+        <label class="form-label"><strong>{{ form.examination_findings.label }}</strong> *</label>
+        {{ form.examination_findings }}
+        <small class="text-muted">Document physical examination findings by system</small>
+        {% if form.examination_findings.errors %}
+        <div class="text-danger">{{ form.examination_findings.errors }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Clinical Notes -->
+    <div class="form-group">
+        <label class="form-label"><strong>{{ form.clinical_notes.label }}</strong> *</label>
+        {{ form.clinical_notes }}
+        <small class="text-muted">Clinical assessment, differential diagnosis, and management plan</small>
+        {% if form.clinical_notes.errors %}
+        <div class="text-danger">{{ form.clinical_notes.errors }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div
+        style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #e9ecef;">
+        <a href="{% url 'medical_records:prescription_wizard_step' patient.patient_id 1 %}"
+            class="btn btn-secondary btn-lg">
+            ← Previous: Vital Signs
+        </a>
+        <button type="submit" class="btn btn-success btn-lg" style="min-width: 150px;">
+            Next: Diagnosis →
+        </button>
+    </div>
+</form>
+{% endblock %}

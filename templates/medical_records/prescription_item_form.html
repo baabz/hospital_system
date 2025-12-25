@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Medication - Galbose Hospital{% endblock %}
+{% block page_title %}Add Medication{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Add Medication to Prescription</h3>
+        <a href="{% url 'medical_records:prescription_detail' prescription.pk %}" class="btn btn-secondary">← Back to
+            Prescription</a>
+    </div>
+
+    <div class="card-body">
+        <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+            <strong>Patient:</strong> {{ prescription.patient.get_full_name }}<br>
+            <strong>Diagnosis:</strong> {{ prescription.diagnosis|truncatewords:15 }}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Medication Name *</label>
+                {{ form.medication_name }}
+                {% if form.medication_name.errors %}
+                <div class="text-danger">{{ form.medication_name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Dosage *</label>
+                    {{ form.dosage }}
+                    {% if form.dosage.errors %}
+                    <div class="text-danger">{{ form.dosage.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Frequency *</label>
+                    {{ form.frequency }}
+                    {% if form.frequency.errors %}
+                    <div class="text-danger">{{ form.frequency.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Duration *</label>
+                    {{ form.duration }}
+                    {% if form.duration.errors %}
+                    <div class="text-danger">{{ form.duration.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Quantity *</label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                    <div class="text-danger">{{ form.quantity.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Special Instructions</label>
+                {{ form.instructions }}
+                <small class="text-muted">e.g., "Take with food", "Avoid alcohol", etc.</small>
+                {% if form.instructions.errors %}
+                <div class="text-danger">{{ form.instructions.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary btn-lg">💊 Add Medication</button>
+                <a href="{% url 'medical_records:prescription_detail' prescription.pk %}"
+                    class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}New Prescription - Galbose Hospital{% endblock %}
+{% block page_title %}New Prescription{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Create Prescription{% if patient %} for {{ patient.get_full_name }}{% endif %}</h3>
+        <a href="{% if patient %}{% url 'patients:patient_detail' patient.patient_id %}{% else %}{% url 'medical_records:prescription_list' %}{% endif %}"
+            class="btn btn-secondary">← Back</a>
+    </div>
+
+    <div class="card-body">
+        {% if patient %}
+        <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+            <strong>Patient:</strong> {{ patient.get_full_name }} ({{ patient.patient_id }})<br>
+            <strong>Age:</strong> {{ patient.age }} years | <strong>Gender:</strong> {{ patient.get_gender_display
+            }}<br>
+            {% if patient.allergies %}<strong>⚠️ Allergies:</strong> <span style="color: #d32f2f;">{{ patient.allergies
+                }}</span><br>{% endif %}
+            {% if patient.chronic_conditions %}<strong>Chronic Conditions:</strong> {{ patient.chronic_conditions }}{% endif %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Patient *</label>
+                    {{ form.patient }}
+                    {% if form.patient.errors %}
+                    <div class="text-danger">{{ form.patient.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Doctor *</label>
+                    {{ form.doctor }}
+                    {% if form.doctor.errors %}
+                    <div class="text-danger">{{ form.doctor.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Diagnosis *</label>
+                {{ form.diagnosis }}
+                <small class="text-muted">Describe the patient's condition and diagnosis</small>
+                {% if form.diagnosis.errors %}
+                <div class="text-danger">{{ form.diagnosis.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Additional Notes</label>
+                {{ form.notes }}
+                <small class="text-muted">Any additional observations or instructions</small>
+                {% if form.notes.errors %}
+                <div class="text-danger">{{ form.notes.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>📋 Note:</strong> After creating this prescription, you'll be able to add medications and their
+                dosages on the next page.
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary btn-lg">📋 Create Prescription</button>
+                <a href="{% if patient %}{% url 'patients:patient_detail' patient.patient_id %}{% else %}{% url 'medical_records:prescription_list' %}{% endif %}"
+                    class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Previous Prescriptions for this Patient -->
+{% if patient %}
+<div class="card" style="margin-top: 1.5rem;">
+    <div class="card-header">
+        <h4 class="card-title">Previous Prescriptions</h4>
+    </div>
+    <div class="card-body">
+        {% if patient.prescriptions.exists %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Doctor</th>
+                        <th>Diagnosis</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescription in patient.prescriptions.all|slice:":5" %}
+                    <tr>
+                        <td>{{ prescription.prescription_date|date:"M d, Y" }}</td>
+                        <td>{{ prescription.doctor.get_full_name }}</td>
+                        <td>{{ prescription.diagnosis|truncatewords:10 }}</td>
+                        <td>
+                            <span
+                                class="badge badge-{% if prescription.is_dispensed %}success{% else %}warning{% endif %}">
+                                {% if prescription.is_dispensed %}Dispensed{% else %}Pending{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No previous prescriptions for this patient.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

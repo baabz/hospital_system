@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ patient.get_full_name }} - Galbose Hospital{% endblock %}
+{% block page_title %}Patient Details{% endblock %}
+
+{% block content %}
+<!-- Patient Header Card -->
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h3 class="card-title">{{ patient.get_full_name }}</h3>
+            <p class="text-muted" style="margin: 0;">Patient ID: <strong>{{ patient.patient_id }}</strong></p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'patients:patient_update' patient.patient_id %}" class="btn btn-primary">✏️ Edit</a>
+            <a href="{% url 'patients:patient_list' %}" class="btn btn-secondary">← Back to List</a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div>
+                <strong>Age:</strong> {{ patient.age }} years<br>
+                <strong>Gender:</strong> {{ patient.get_gender_display }}<br>
+                <strong>Blood Group:</strong> {% if patient.blood_group %}<span class="badge badge-info">{{
+                    patient.blood_group }}</span>{% else %}<span class="text-muted">Not recorded</span>{% endif %}<br>
+            </div>
+            <div>
+                <strong>Phone:</strong> {{ patient.phone }}<br>
+                <strong>Email:</strong> {{ patient.email|default:"N/A" }}<br>
+                <strong>Address:</strong> {{ patient.address }}
+            </div>
+            <div>
+                <strong>Emergency Contact:</strong> {{ patient.emergency_contact_name }}<br>
+                <strong>Contact Phone:</strong> {{ patient.emergency_contact_phone }}<br>
+                <strong>Relationship:</strong> {{ patient.emergency_contact_relationship }}
+            </div>
+            <div>
+                <strong>Allergies:</strong> {{ patient.allergies|default:"None" }}<br>
+                <strong>Chronic Conditions:</strong> {{ patient.chronic_conditions|default:"None" }}<br>
+                <strong>Registered:</strong> {{ patient.created_at|date:"M d, Y" }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+    <a href="{% url 'appointments:appointment_create' %}?patient={{ patient.pk }}" class="btn btn-success btn-lg"><i
+            class="fas fa-calendar-plus"></i>
+        Book Appointment</a>
+    <a href="{% url 'medical_records:prescription_wizard' patient.patient_id %}" class="btn btn-info btn-lg"><i
+            class="fas fa-stethoscope"></i> New
+        Consultation</a>
+    <a href="{% url 'billing:invoice_create' %}?patient={{ patient.pk }}" class="btn btn-warning btn-lg"><i
+            class="fas fa-file-invoice"></i> Create
+        Invoice</a>
+    <a href="{% url 'medical_records:lab_test_create_for_patient' patient.patient_id %}"
+        class="btn btn-primary btn-lg"><i class="fas fa-flask"></i> Order Lab Test</a>
+</div>
+
+<!-- Tabs for Medical History -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 1.5rem;">
+    <!-- Recent Visits -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Recent Visits</h4>
+        </div>
+        <div class="card-body">
+            {% if visits %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Doctor</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visit in visits %}
+                        <tr>
+                            <td>{{ visit.visit_date|date:"M d, Y H:i" }}</td>
+                            <td>{{ visit.attending_doctor.get_full_name|default:"N/A" }}</td>
+                            <td>{{ visit.reason|truncatewords:10 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No visits recorded yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Appointments -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Appointments</h4>
+        </div>
+        <div class="card-body">
+            {% if appointments %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Doctor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                        <tr>
+                            <td>
+                                {% if appointment.appointment_datetime %}
+                                {{ appointment.appointment_datetime|date:"M d, Y" }}<br>
+                                {{ appointment.appointment_datetime|time:"H:i" }}
+                                {% else %}
+                                {{ appointment.appointment_date|date:"M d, Y" }}<br>
+                                {{ appointment.appointment_time|time:"H:i" }}
+                                {% endif %}
+                            </td>
+                            <td>{{ appointment.doctor.get_full_name }}</td>
+                            <td>
+                                <span
+                                    class="badge badge-{% if appointment.status == 'confirmed' %}success{% elif appointment.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                    {{ appointment.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No appointments scheduled.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Prescriptions -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Prescriptions</h4>
+        </div>
+        <div class="card-body">
+            {% if prescriptions %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Doctor</th>
+                            <th>Diagnosis</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prescription in prescriptions %}
+                        <tr>
+                            <td>{{ prescription.prescription_date|date:"M d, Y" }}</td>
+                            <td>{{ prescription.doctor.get_full_name }}</td>
+                            <td>{{ prescription.diagnosis|truncatewords:8 }}</td>
+                            <td>
+                                <span
+                                    class="badge badge-{% if prescription.is_dispensed %}success{% else %}warning{% endif %}">
+                                    {% if prescription.is_dispensed %}Dispensed{% else %}Pending{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No prescriptions issued.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Invoices -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Billing History</h4>
+        </div>
+        <div class="card-body">
+            {% if invoices %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                        <tr>
+                            <td><strong>{{ invoice.invoice_number }}</strong></td>
+                            <td>{{ invoice.issue_date|date:"M d, Y" }}</td>
+                            <td>₦{{ invoice.total|floatformat:2 }}</td>
+                            <td>
+                                <span
+                                    class="badge badge-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'partially_paid' %}warning{% else %}danger{% endif %}">
+                                    {{ invoice.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No invoices generated.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

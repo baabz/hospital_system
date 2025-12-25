@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Expense - Galbose Hospital{% endblock %}
+{% block page_title %}Record Expense{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Record New Expense</h3>
+        <a href="{% url 'billing:expense_list' %}" class="btn btn-secondary">← Back</a>
+    </div>
+
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    {{ form.category }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Expense Type *</label>
+                    {{ form.expense_type }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description *</label>
+                {{ form.description }}
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Amount (₦) *</label>
+                    {{ form.amount }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Expense Date *</label>
+                    {{ form.expense_date }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Vendor/Supplier</label>
+                    {{ form.vendor }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Receipt Number</label>
+                    {{ form.receipt_number }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                {{ form.notes }}
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary btn-lg">Record Expense</button>
+                <a href="{% url 'billing:expense_list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

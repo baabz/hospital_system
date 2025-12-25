@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Patients - Galbose Hospital{% endblock %}
+{% block page_title %}Patients{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Patient Directory</h3>
+        <a href="{% url 'patients:patient_create' %}" class="btn btn-primary">
+            ➕ Register New Patient
+        </a>
+    </div>
+
+    <div class="card-body">
+        <!-- Search Form -->
+        <form method="get" class="mb-2">
+            <div class="flex gap-1">
+                <input type="text" name="q" value="{{ query }}" placeholder="Search by name, ID, phone, or email..."
+                    class="form-control" style="flex: 1;">
+                <button type="submit" class="btn btn-primary">🔍 Search</button>
+                {% if query %}
+                <a href="{% url 'patients:patient_list' %}" class="btn btn-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Patients Table -->
+        {% if patients %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Blood Group</th>
+                        <th>Phone</th>
+                        <th>Registered</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td><strong>{{ patient.patient_id }}</strong></td>
+                        <td>{{ patient.get_full_name }}</td>
+                        <td>{{ patient.age }} years</td>
+                        <td>{{ patient.get_gender_display }}</td>
+                        <td>
+                            {% if patient.blood_group %}
+                            <span class="badge badge-info">{{ patient.blood_group }}</span>
+                            {% else %}
+                            <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ patient.phone }}</td>
+                        <td>{{ patient.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'patients:patient_detail' patient.patient_id %}"
+                                class="btn btn-sm btn-primary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            {% if query %}
+            No patients found matching "{{ query }}".
+            {% else %}
+            No patients registered yet. Click "Register New Patient" to add one.
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

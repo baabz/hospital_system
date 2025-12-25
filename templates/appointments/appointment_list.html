@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointments - Galbose Hospital{% endblock %}
+{% block page_title %}Appointments{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Appointment Schedule</h3>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'appointments:appointment_calendar' %}" class="btn btn-secondary">📅 Calendar View</a>
+            <a href="{% url 'appointments:appointment_create' %}" class="btn btn-primary">➕ Book Appointment</a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Filters -->
+        <form method="get" class="mb-2">
+            <div class="flex gap-1">
+                <select name="status" class="form-control" style="max-width: 200px;">
+                    <option value="">All Statuses</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+                <input type="date" name="date" value="{{ date_filter }}" class="form-control" style="max-width: 200px;">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                {% if status_filter or date_filter %}
+                <a href="{% url 'appointments:appointment_list' %}" class="btn btn-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Appointments Table -->
+        {% if appointments %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Type</th>
+                        <th>Fee</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td>
+                            {% if appointment.appointment_datetime %}
+                            <strong>{{ appointment.appointment_datetime|date:"M d, Y" }}</strong><br>
+                            {{ appointment.appointment_datetime|time:"H:i" }}
+                            {% else %}
+                            <strong>{{ appointment.appointment_date|date:"M d, Y" }}</strong><br>
+                            {{ appointment.appointment_time|time:"H:i" }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'patients:patient_detail' appointment.patient.patient_id %}">
+                                {{ appointment.patient.get_full_name }}
+                            </a><br>
+                            <small class="text-muted">{{ appointment.patient.patient_id }}</small>
+                        </td>
+                        <td>
+                            {% if appointment.doctor %}
+                            {{ appointment.doctor.get_full_name }}
+                            {% else %}
+                            <span class="badge badge-warning">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if appointment.appointment_type_new %}
+                            <span class="badge badge-info">{{ appointment.appointment_type_new.name }}</span>
+                            {% else %}
+                            <span class="badge badge-info">{{ appointment.get_appointment_type_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>₦{{ appointment.fee|floatformat:2 }}</td>
+                        <td>{{ appointment.reason|truncatewords:10 }}</td>
+                        <td>
+                            <span
+                                class="badge badge-{% if appointment.status == 'confirmed' %}success{% elif appointment.status == 'pending' %}warning{% elif appointment.status == 'completed' %}info{% else %}secondary{% endif %}">
+                                {{ appointment.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                                {% if appointment.can_start_consultation %}
+                                <!-- Start Consultation Button for Pending Appointments -->
+                                <a href="{% url 'appointments:appointment_start_consultation' appointment.pk %}"
+                                    class="btn btn-sm btn-success" title="Start consultation and create prescription">
+                                    🩺 Start
+                                </a>
+                                {% endif %}
+
+
+                                {% if appointment.status == 'confirmed' %}
+                                <!-- Prescription button for confirmed appointments -->
+                                <a href="{% url 'medical_records:prescription_create_from_appointment' appointment.pk %}"
+                                    class="btn btn-sm btn-primary" title="Create prescription">
+                                    📝 Prescription
+                                </a>
+                                {% endif %}
+
+                                {% if appointment.can_complete %}
+                                <!-- Manual Complete Button -->
+                                <form method="post"
+                                    action="{% url 'appointments:appointment_complete' appointment.pk %}"
+                                    style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-info" title="Mark as completed">
+                                        ✓ Complete
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <!-- Edit Button (always available for non-completed) -->
+                                {% if appointment.status != 'completed' %}
+                                <a href="{% url 'appointments:appointment_update' appointment.pk %}"
+                                    class="btn btn-sm btn-secondary" title="Edit appointment">
+                                    ✏️
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No appointments found. Click "Book Appointment" to schedule one.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

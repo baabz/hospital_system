@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff - Galbose Hospital{% endblock %}
+{% block page_title %}Staff Directory{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Hospital Staff</h3>
+        <a href="{% url 'staff:department_list' %}" class="btn btn-secondary">📋 Departments</a>
+    </div>
+
+    <div class="card-body">
+        {% if staff %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in staff %}
+                    <tr>
+                        <td><strong>{{ member.get_full_name }}</strong></td>
+                        <td><span class="badge badge-primary">{{ member.get_role_display }}</span></td>
+                        <td>{{ member.department.name|default:"N/A" }}</td>
+                        <td>{{ member.email }}</td>
+                        <td>{{ member.phone }}</td>
+                        <td>
+                            {% if member.is_active_staff %}
+                            <span class="badge badge-success">Active</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No staff members found.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

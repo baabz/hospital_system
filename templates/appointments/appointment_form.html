@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_update %}Edit{% else %}Book{% endif %} Appointment - Galbose Hospital{% endblock %}
+{% block page_title %}{% if is_update %}Edit Appointment{% else %}Book New Appointment{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">{% if is_update %}Edit Appointment{% else %}Book New Appointment{% endif %}</h3>
+        <a href="{% url 'appointments:appointment_list' %}" class="btn btn-secondary">← Back</a>
+    </div>
+
+    <div class="card-body">
+        <form method="post" id="appointment-form">
+            {% csrf_token %}
+
+            <!-- Display form-wide errors -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                <strong>Error:</strong>
+                <ul class="mb-0">
+                    {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Display general error message if form has errors -->
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                <strong>Please correct the following errors:</strong>
+                <ul class="mb-0">
+                    {% for field in form %}
+                    {% if field.errors %}
+                    {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Patient *</label>
+                    {{ form.patient }}
+                    {% if form.patient.errors %}
+                    <div class="text-danger small mt-1">{{ form.patient.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Doctor (Optional)</label>
+                    {{ form.doctor }}
+                    <small class="form-text text-muted">Leave blank if doctor will be assigned later</small>
+                    {% if form.doctor.errors %}
+                    <div class="text-danger small mt-1">{{ form.doctor.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Appointment Type *</label>
+                    {{ form.appointment_type_new }}
+                    {% if form.appointment_type_new.errors %}
+                    <div class="text-danger small mt-1">{{ form.appointment_type_new.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date & Time *</label>
+                    {{ form.appointment_datetime }}
+                    {% if form.appointment_datetime.errors %}
+                    <div class="text-danger small mt-1">{{ form.appointment_datetime.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Duration (minutes) *</label>
+                    {{ form.duration_minutes }}
+                    {% if form.duration_minutes.errors %}
+                    <div class="text-danger small mt-1">{{ form.duration_minutes.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Fee</label>
+                    <input type="text" class="form-control" id="fee-display" readonly value="₦0.00"
+                        style="background-color: #f8f9fa;">
+                    <small class="form-text text-muted">Auto-populated based on appointment type</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status *</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                    <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Reason for Visit *</label>
+                {{ form.reason }}
+                {% if form.reason.errors %}
+                <div class="text-danger small mt-1">{{ form.reason.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    {% if is_update %}Update Appointment{% else %}Book Appointment{% endif %}
+                </button>
+                <a href="{% url 'appointments:appointment_list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Auto-populate fee when appointment type is selected
+    document.addEventListener('DOMContentLoaded', function () {
+        const appointmentTypeSelect = document.getElementById('appointment-type-select');
+        const feeDisplay = document.getElementById('fee-display');
+
+        // Build fee data from appointment types (id -> number)
+        const feeData = {
+            {% for apt_type in form.fields.appointment_type_new.queryset %}
+        '{{ apt_type.id }}': { { apt_type.fee } }, {% endfor %}
+    };
+
+    function formatCurrency(amount) {
+        try {
+            return '₦' + Number(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } catch (e) {
+            return '₦0.00';
+        }
+    }
+
+    function updateFee() {
+        if (!appointmentTypeSelect || !feeDisplay) return;
+        const selectedType = appointmentTypeSelect.value;
+        const fee = feeData[selectedType];
+        if (fee !== undefined && fee !== null) {
+            feeDisplay.value = formatCurrency(fee);
+        } else {
+            feeDisplay.value = '₦0.00';
+        }
+    }
+
+    // Update fee on page load if type is already selected
+    updateFee();
+
+    // Update fee when appointment type changes
+    if (appointmentTypeSelect) {
+        appointmentTypeSelect.addEventListener('change', updateFee);
+    }
+    });
+</script>
+{% endblock %}

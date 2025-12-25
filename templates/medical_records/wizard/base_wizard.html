@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}New Consultation - Step {{ current_step }} of {{ total_steps }} - Galbose Hospital{% endblock %}
+{% block page_title %}New Consultation{% endblock %}
+
+{% block content %}
+<div class="card">
+    <!-- Patient Header -->
+    <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div>
+            <h3 class="card-title" style="color: white; margin: 0;"><i class="fas fa-stethoscope"></i> New Consultation
+            </h3>
+            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">
+                <strong>Patient:</strong> {{ patient.get_full_name }} ({{ patient.patient_id }}) |
+                <strong>Age:</strong> {{ patient.age }} years |
+                <strong>Gender:</strong> {{ patient.get_gender_display }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div style="padding: 1.5rem; background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <!-- Step 1 -->
+            <div style="flex: 1; text-align: center;">
+                <div style="display: inline-block; width: 40px; height: 40px; border-radius: 50%; 
+                            background: {% if current_step >= 1 %}#28a745{% else %}#dee2e6{% endif %}; 
+                            color: white; line-height: 40px; font-weight: bold; margin-bottom: 0.5rem;">
+                    {% if 1 in completed_steps %}✓{% else %}1{% endif %}
+                </div>
+                <div style="font-size: 0.875rem; font-weight: {% if current_step == 1 %}bold{% else %}normal{% endif %}; 
+                            color: {% if current_step >= 1 %}#28a745{% else %}#6c757d{% endif %};">
+                    Vital Signs
+                </div>
+            </div>
+
+            <!-- Connector -->
+            <div
+                style="flex: 0.5; height: 2px; background: {% if current_step > 1 %}#28a745{% else %}#dee2e6{% endif %}; margin: 0 0.5rem 1.5rem 0.5rem;">
+            </div>
+
+            <!-- Step 2 -->
+            <div style="flex: 1; text-align: center;">
+                <div style="display: inline-block; width: 40px; height: 40px; border-radius: 50%; 
+                            background: {% if current_step >= 2 %}#28a745{% else %}#dee2e6{% endif %}; 
+                            color: white; line-height: 40px; font-weight: bold; margin-bottom: 0.5rem;">
+                    {% if 2 in completed_steps %}✓{% else %}2{% endif %}
+                </div>
+                <div style="font-size: 0.875rem; font-weight: {% if current_step == 2 %}bold{% else %}normal{% endif %}; 
+                            color: {% if current_step >= 2 %}#28a745{% else %}#6c757d{% endif %};">
+                    Clinical Notes
+                </div>
+            </div>
+
+            <!-- Connector -->
+            <div
+                style="flex: 0.5; height: 2px; background: {% if current_step > 2 %}#28a745{% else %}#dee2e6{% endif %}; margin: 0 0.5rem 1.5rem 0.5rem;">
+            </div>
+
+            <!-- Step 3 -->
+            <div style="flex: 1; text-align: center;">
+                <div style="display: inline-block; width: 40px; height: 40px; border-radius: 50%; 
+                            background: {% if current_step >= 3 %}#28a745{% else %}#dee2e6{% endif %}; 
+                            color: white; line-height: 40px; font-weight: bold; margin-bottom: 0.5rem;">
+                    {% if 3 in completed_steps %}✓{% else %}3{% endif %}
+                </div>
+                <div style="font-size: 0.875rem; font-weight: {% if current_step == 3 %}bold{% else %}normal{% endif %}; 
+                            color: {% if current_step >= 3 %}#28a745{% else %}#6c757d{% endif %};">
+                    Diagnosis
+                </div>
+            </div>
+
+            <!-- Connector -->
+            <div
+                style="flex: 0.5; height: 2px; background: {% if current_step > 3 %}#28a745{% else %}#dee2e6{% endif %}; margin: 0 0.5rem 1.5rem 0.5rem;">
+            </div>
+
+            <!-- Step 4 -->
+            <div style="flex: 1; text-align: center;">
+                <div style="display: inline-block; width: 40px; height: 40px; border-radius: 50%; 
+                            background: {% if current_step >= 4 %}#28a745{% else %}#dee2e6{% endif %}; 
+                            color: white; line-height: 40px; font-weight: bold; margin-bottom: 0.5rem;">
+                    {% if 4 in completed_steps %}✓{% else %}4{% endif %}
+                </div>
+                <div style="font-size: 0.875rem; font-weight: {% if current_step == 4 %}bold{% else %}normal{% endif %}; 
+                            color: {% if current_step >= 4 %}#28a745{% else %}#6c757d{% endif %};">
+                    Prescription
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div style="width: 100%; height: 8px; background: #dee2e6; border-radius: 4px; overflow: hidden;">
+            <div
+                style="width: {% if current_step == 1 %}0{% elif current_step == 2 %}33{% elif current_step == 3 %}66{% else %}100{% endif %}%; height: 100%; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.3s ease;">
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 0.5rem; font-size: 0.875rem; color: #6c757d;">
+            Step {{ current_step }} of {{ total_steps }} - {% if current_step == 1 %}0{% elif current_step == 2 %}25{%
+            elif current_step == 3 %}50{% elif current_step == 4 %}75{% endif %}% Complete
+        </div>
+    </div>
+
+    <!-- Step Content -->
+    <div class="card-body">
+        {% block wizard_content %}
+        <!-- Step-specific content goes here -->
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

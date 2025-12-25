@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Prescription Details - Galbose Hospital{% endblock %}
+{% block page_title %}Prescription Details{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h3 class="card-title">Prescription #{{ prescription.pk }}</h3>
+            <p class="text-muted" style="margin: 0;">{{ prescription.prescription_date|date:"F d, Y - H:i" }}</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'medical_records:prescription_item_create' prescription.pk %}" class="btn btn-primary"><i
+                    class="fas fa-plus"></i> Add
+                Medication</a>
+            <a href="{% url 'patients:patient_detail' prescription.patient.patient_id %}" class="btn btn-secondary">←
+                Back to Patient</a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- Patient & Doctor Info -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div>
+                <h4>Patient Information</h4>
+                <strong>Name:</strong> {{ prescription.patient.get_full_name }}<br>
+                <strong>Patient ID:</strong> {{ prescription.patient.patient_id }}<br>
+                <strong>Age:</strong> {{ prescription.patient.age }} years<br>
+                <strong>Gender:</strong> {{ prescription.patient.get_gender_display }}
+            </div>
+            <div>
+                <h4>Prescribing Doctor</h4>
+                <strong>Name:</strong> {{ prescription.doctor.get_full_name }}<br>
+                <strong>Role:</strong> {{ prescription.doctor.get_role_display }}
+            </div>
+        </div>
+
+        <!-- Diagnosis -->
+        <div style="margin-bottom: 2rem;">
+            <h4>Diagnosis</h4>
+            <div style="background: #f5f5f5; padding: 1rem; border-radius: 4px;">
+                {{ prescription.diagnosis }}
+            </div>
+        </div>
+
+        <!-- Notes -->
+        {% if prescription.notes %}
+        <div style="margin-bottom: 2rem;">
+            <h4>Additional Notes</h4>
+            <div style="background: #f5f5f5; padding: 1rem; border-radius: 4px;">
+                {{ prescription.notes }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Dispensing Status -->
+        <div style="margin-bottom: 2rem;">
+            <h4>Dispensing Status</h4>
+            <span class="badge badge-{% if prescription.is_dispensed %}success{% else %}warning{% endif %} badge-lg">
+                {% if prescription.is_dispensed %}
+                ✓ Dispensed
+                {% else %}
+                ⏳ Pending Dispensing
+                {% endif %}
+            </span>
+            {% if prescription.is_dispensed %}
+            <div style="margin-top: 0.5rem;">
+                <small class="text-muted">
+                    Dispensed by {{ prescription.dispensed_by.get_full_name }} on {{ prescription.dispensed_at|date:"M
+                    d, Y - H:i" }}
+                </small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Medications -->
+<div class="card" style="margin-top: 1.5rem;">
+    <div class="card-header">
+        <h4 class="card-title">Prescribed Medications</h4>
+        <a href="{% url 'medical_records:prescription_item_create' prescription.pk %}" class="btn btn-primary"><i
+                class="fas fa-plus"></i> Add
+            Medication</a>
+    </div>
+    <div class="card-body">
+        {% if items %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency</th>
+                        <th>Duration</th>
+                        <th>Quantity</th>
+                        <th>Instructions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td><strong>{{ item.medication_name }}</strong></td>
+                        <td>{{ item.dosage }}</td>
+                        <td>{{ item.frequency }}</td>
+                        <td>{{ item.duration }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.instructions|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <strong>No medications added yet.</strong> Click "Add Medication" to prescribe medications for this patient.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

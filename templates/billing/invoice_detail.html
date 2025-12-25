@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} - Galbose Hospital{% endblock %}
+{% block page_title %}Invoice Details{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h3 class="card-title">Invoice {{ invoice.invoice_number }}</h3>
+            <p class="text-muted" style="margin: 0;">
+                <span class="badge badge-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'partially_paid' %}warning{% elif invoice.status == 'overdue' %}danger{% else %}info{% endif %}">
+                    {{ invoice.get_status_display }}
+                </span>
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'billing:invoice_add_item' invoice.invoice_number %}" class="btn btn-primary">➕ Add Item</a>
+            {% if invoice.balance_due > 0 %}
+            <a href="{% url 'billing:invoice_record_payment' invoice.invoice_number %}" class="btn btn-success">💵 Record Payment</a>
+            {% endif %}
+            <a href="{% url 'billing:invoice_list' %}" class="btn btn-secondary">← Back</a>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <!-- Invoice Header -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--gray-200);">
+            <div>
+                <strong>Patient:</strong><br>
+                <a href="{% url 'patients:patient_detail' invoice.patient.patient_id %}">
+                    {{ invoice.patient.get_full_name }}
+                </a><br>
+                <small class="text-muted">{{ invoice.patient.patient_id }}</small>
+            </div>
+            <div>
+                <strong>Issue Date:</strong> {{ invoice.issue_date|date:"M d, Y" }}<br>
+                <strong>Due Date:</strong> {{ invoice.due_date|date:"M d, Y" }}
+            </div>
+            <div>
+                <strong>Created By:</strong> {{ invoice.created_by.get_full_name }}<br>
+                <strong>Created:</strong> {{ invoice.created_at|date:"M d, Y H:i" }}
+            </div>
+        </div>
+        
+        <!-- Invoice Items -->
+        <h4 style="margin-bottom: 1rem;">Invoice Items</h4>
+        {% if items %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td><span class="badge badge-info">{{ item.get_item_type_display }}</span></td>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₦{{ item.unit_price|floatformat:2 }}</td>
+                        <td><strong>₦{{ item.total|floatformat:2 }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            No items added yet. Click "Add Item" to add services, medications, or tests.
+        </div>
+        {% endif %}
+        
+        <!-- Invoice Summary -->
+        <div style="margin-top: 2rem; padding: 1.5rem; background: var(--gray-50); border-radius: var(--radius-lg);">
+            <div style="max-width: 400px; margin-left: auto;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Subtotal:</span>
+                    <strong>₦{{ invoice.subtotal|floatformat:2 }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Tax:</span>
+                    <strong>₦{{ invoice.tax|floatformat:2 }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Discount:</span>
+                    <strong>-₦{{ invoice.discount|floatformat:2 }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-top: 0.5rem; border-top: 2px solid var(--gray-300); font-size: 1.25rem;">
+                    <strong>Total:</strong>
+                    <strong style="color: var(--primary);">₦{{ invoice.total|floatformat:2 }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                    <span>Amount Paid:</span>
+                    <strong style="color: var(--success);">₦{{ invoice.amount_paid|floatformat:2 }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding-top: 0.5rem; border-top: 1px solid var(--gray-300); font-size: 1.125rem;">
+                    <strong>Balance Due:</strong>
+                    <strong style="color: {% if invoice.balance_due > 0 %}var(--danger){% else %}var(--success){% endif %};">
+                        ₦{{ invoice.balance_due|floatformat:2 }}
+                    </strong>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment History -->
+        {% if payments %}
+        <h4 style="margin-top: 2rem; margin-bottom: 1rem;">Payment History</h4>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Reference</th>
+                        <th>Received By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.payment_date|date:"M d, Y H:i" }}</td>
+                        <td><strong>₦{{ payment.amount|floatformat:2 }}</strong></td>
+                        <td><span class="badge badge-success">{{ payment.get_payment_method_display }}</span></td>
+                        <td>{{ payment.reference_number|default:"N/A" }}</td>
+                        <td>{{ payment.received_by.get_full_name }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

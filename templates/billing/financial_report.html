@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Financial Report - Galbose Hospital{% endblock %}
+{% block page_title %}Financial Report{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Financial Report</h3>
+        <a href="{% url 'billing:expense_list' %}" class="btn btn-secondary">← Back to Expenses</a>
+    </div>
+
+    <div class="card-body">
+        <!-- Date Range Filter -->
+        <form method="get" class="mb-2">
+            <div class="flex gap-1">
+                <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="form-control"
+                    style="max-width: 200px;">
+                <span style="padding: 0.5rem;">to</span>
+                <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="form-control"
+                    style="max-width: 200px;">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+
+        <!-- Financial Summary -->
+        <div class="stats-grid" style="margin-top: 2rem;">
+            <div class="stat-card success">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value">₦{{ income|floatformat:2 }}</div>
+                <div class="stat-label">Total Income</div>
+                <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem;">
+                    From {{ start_date|date:"M d" }} to {{ end_date|date:"M d, Y" }}
+                </p>
+            </div>
+
+            <div class="stat-card danger">
+                <div class="stat-icon">📉</div>
+                <div class="stat-value">₦{{ expenses|floatformat:2 }}</div>
+                <div class="stat-label">Total Expenses</div>
+                <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem;">
+                    Operating costs
+                </p>
+            </div>
+
+            <div class="stat-card {% if profit >= 0 %}info{% else %}warning{% endif %}">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value"
+                    style="color: {% if profit >= 0 %}var(--success){% else %}var(--danger){% endif %};">
+                    ₦{{ profit|floatformat:2 }}
+                </div>
+                <div class="stat-label">Net Profit</div>
+                <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem;">
+                    {% if profit >= 0 %}Profitable{% else %}Loss{% endif %}
+                </p>
+            </div>
+
+            <div class="stat-card info">
+                <div class="stat-icon">📈</div>
+                <div class="stat-value">
+                    {% if income > 0 %}
+                    {{ profit|floatformat:0|add:0|mul:100|div:income|floatformat:1 }}%
+                    {% else %}
+                    0%
+                    {% endif %}
+                </div>
+                <div class="stat-label">Profit Margin</div>
+                <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem;">
+                    Profitability ratio
+                </p>
+            </div>
+        </div>
+
+        <!-- Expense Breakdown -->
+        {% if expense_breakdown %}
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h4 class="card-title">Expense Breakdown by Type</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Expense Type</th>
+                                <th>Amount</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in expense_breakdown %}
+                            <tr>
+                                <td><strong>{{ item.expense_type|title }}</strong></td>
+                                <td>₦{{ item.total|floatformat:2 }}</td>
+                                <td>
+                                    {% widthratio item.total expenses 100 %}%
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

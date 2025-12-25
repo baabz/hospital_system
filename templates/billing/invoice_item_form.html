@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Item to Invoice - Galbose Hospital{% endblock %}
+{% block page_title %}Add Invoice Item{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Add Item to Invoice {{ invoice.invoice_number }}</h3>
+        <a href="{% url 'billing:invoice_detail' invoice.invoice_number %}" class="btn btn-secondary">← Back</a>
+    </div>
+
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Item Type *</label>
+                    {{ form.item_type }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description *</label>
+                    {{ form.description }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Quantity *</label>
+                    {{ form.quantity }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Unit Price (₦) *</label>
+                    {{ form.unit_price }}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary btn-lg">Add Item</button>
+                <a href="{% url 'billing:invoice_detail' invoice.invoice_number %}"
+                    class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

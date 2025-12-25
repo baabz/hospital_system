@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Lab Test Details - Galbose Hospital{% endblock %}
+{% block page_title %}Lab Test Details{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h3 class="card-title">{{ lab_test.test_name }}</h3>
+            <p class="text-muted" style="margin: 0;">{{ lab_test.test_type }}</p>
+        </div>
+        <a href="{% url 'medical_records:lab_test_list' %}" class="btn btn-secondary">← Back to List</a>
+    </div>
+
+    <div class="card-body">
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div>
+                <strong>Patient:</strong><br>
+                <a href="{% url 'patients:patient_detail' lab_test.patient.patient_id %}">
+                    {{ lab_test.patient.get_full_name }}
+                </a><br>
+                <small class="text-muted">{{ lab_test.patient.patient_id }}</small>
+            </div>
+            <div>
+                <strong>Ordered By:</strong> {{ lab_test.ordered_by.get_full_name }}<br>
+                <strong>Ordered Date:</strong> {{ lab_test.ordered_at|date:"M d, Y H:i" }}
+            </div>
+            <div>
+                <strong>Status:</strong>
+                <span
+                    class="badge badge-{% if lab_test.status == 'completed' %}success{% elif lab_test.status == 'in_progress' %}warning{% else %}info{% endif %}">
+                    {{ lab_test.get_status_display }}
+                </span><br>
+                {% if lab_test.completed_at %}
+                <strong>Completed:</strong> {{ lab_test.completed_at|date:"M d, Y H:i" }}
+                {% endif %}
+            </div>
+        </div>
+
+        {% if lab_test.notes %}
+        <div class="alert alert-info">
+            <strong>Notes:</strong> {{ lab_test.notes }}
+        </div>
+        {% endif %}
+
+        {% if lab_test.results %}
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <h4 class="card-title">Test Results</h4>
+            </div>
+            <div class="card-body">
+                <pre style="white-space: pre-wrap;">{{ lab_test.results }}</pre>
+                {% if lab_test.result_file %}
+                <a href="{{ lab_test.result_file.url }}" class="btn btn-primary" target="_blank">📄 View Result File</a>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            Results pending. Test is currently {{ lab_test.get_status_display|lower }}.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

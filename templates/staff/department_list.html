@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Departments - Galbose Hospital{% endblock %}
+{% block page_title %}Hospital Departments{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Hospital Departments</h3>
+        <a href="{% url 'staff:department_create' %}" class="btn btn-primary">➕ Add Department</a>
+    </div>
+
+    <div class="card-body">
+        {% if departments %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Department Name</th>
+                        <th>Description</th>
+                        <th>Department Head</th>
+                        <th>Staff Count</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dept in departments %}
+                    <tr>
+                        <td><strong>{{ dept.name }}</strong></td>
+                        <td>{{ dept.description|truncatewords:15|default:"No description" }}</td>
+                        <td>
+                            {% if dept.head %}
+                            {{ dept.head.get_full_name }}
+                            {% else %}
+                            <span class="text-muted">Not assigned</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ dept.staff_count }}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="{% url 'staff:department_edit' dept.pk %}" class="btn btn-sm btn-info">✏️
+                                    Edit</a>
+                                <a href="{% url 'staff:department_delete' dept.pk %}" class="btn btn-sm btn-danger">🗑️
+                                    Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No departments found. Click "Add Department" to create one.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

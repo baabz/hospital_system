@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Lab Tests - Galbose Hospital{% endblock %}
+{% block page_title %}Lab Tests{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Lab Test Orders</h3>
+        <a href="{% url 'medical_records:lab_test_create' %}" class="btn btn-primary">🔬 Order Lab Test</a>
+    </div>
+
+    <div class="card-body">
+        <!-- Filters -->
+        <form method="get" class="mb-2">
+            <div class="flex gap-1">
+                <select name="status" class="form-control" style="max-width: 200px;">
+                    <option value="">All Statuses</option>
+                    <option value="ordered" {% if status_filter == 'ordered' %}selected{% endif %}>Ordered</option>
+                    <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress
+                    </option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Filter</button>
+                {% if status_filter %}
+                <a href="{% url 'medical_records:lab_test_list' %}" class="btn btn-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Lab Tests Table -->
+        {% if lab_tests %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Test Name</th>
+                        <th>Test Type</th>
+                        <th>Ordered By</th>
+                        <th>Ordered Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in lab_tests %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'patients:patient_detail' test.patient.patient_id %}">
+                                {{ test.patient.get_full_name }}
+                            </a><br>
+                            <small class="text-muted">{{ test.patient.patient_id }}</small>
+                        </td>
+                        <td><strong>{{ test.test_name }}</strong></td>
+                        <td><span class="badge badge-info">{{ test.test_type }}</span></td>
+                        <td>{{ test.ordered_by.get_full_name }}</td>
+                        <td>{{ test.ordered_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <span
+                                class="badge badge-{% if test.status == 'completed' %}success{% elif test.status == 'in_progress' %}warning{% elif test.status == 'ordered' %}info{% else %}secondary{% endif %}">
+                                {{ test.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'medical_records:lab_test_detail' test.pk %}"
+                                class="btn btn-sm btn-primary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No lab tests found. Click "Order Lab Test" to create one.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

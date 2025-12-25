@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Clinical Documentation - Galbose Hospital{% endblock %}
+{% block page_title %}Clinical Documentation{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">📋 Clinical Assessment - {{ visit.patient.get_full_name }}</h3>
+        <a href="{% url 'patients:patient_detail' visit.patient.patient_id %}" class="btn btn-secondary">← Back</a>
+    </div>
+
+    <div class="card-body">
+        <!-- Patient Info -->
+        <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+            <strong>Patient:</strong> {{ visit.patient.get_full_name }} ({{ visit.patient.patient_id }})<br>
+            <strong>Age:</strong> {{ visit.patient.age }} years | <strong>Gender:</strong> {{
+            visit.patient.get_gender_display }}<br>
+            <strong>Visit Date:</strong> {{ visit.visit_date|date:"M d, Y H:i" }}<br>
+            <strong>Reason:</strong> {{ visit.reason }}
+
+            {% if visit.has_vital_signs %}
+            <hr style="margin: 0.5rem 0;">
+            <strong>Vital Signs:</strong>
+            {% if visit.temperature %}Temp: {{ visit.temperature }}°C{% endif %}
+            {% if visit.get_blood_pressure %} | BP: {{ visit.get_blood_pressure }} mmHg{% endif %}
+            {% if visit.pulse_rate %} | Pulse: {{ visit.pulse_rate }} bpm{% endif %}
+            {% if visit.oxygen_saturation %} | SpO2: {{ visit.oxygen_saturation }}%{% endif %}
+            {% endif %}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Presenting Complaint -->
+            <div class="form-group">
+                <label class="form-label"><strong>{{ form.presenting_complaint.label }}</strong> *</label>
+                {{ form.presenting_complaint }}
+                <small class="text-muted">Document the chief complaint and detailed history of the presenting
+                    illness</small>
+                {% if form.presenting_complaint.errors %}
+                <div class="text-danger">{{ form.presenting_complaint.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Past Medical History -->
+            <div class="form-group">
+                <label class="form-label"><strong>{{ form.past_medical_history.label }}</strong></label>
+                {{ form.past_medical_history }}
+                <small class="text-muted">Relevant past medical history, previous surgeries, chronic conditions</small>
+                {% if form.past_medical_history.errors %}
+                <div class="text-danger">{{ form.past_medical_history.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Examination Findings -->
+            <div class="form-group">
+                <label class="form-label"><strong>{{ form.examination_findings.label }}</strong> *</label>
+                {{ form.examination_findings }}
+                <small class="text-muted">Document physical examination findings by system</small>
+                {% if form.examination_findings.errors %}
+                <div class="text-danger">{{ form.examination_findings.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Clinical Notes -->
+            <div class="form-group">
+                <label class="form-label"><strong>{{ form.clinical_notes.label }}</strong> *</label>
+                {{ form.clinical_notes }}
+                <small class="text-muted">Clinical assessment, differential diagnosis, and management plan</small>
+                {% if form.clinical_notes.errors %}
+                <div class="text-danger">{{ form.clinical_notes.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>📝 Note:</strong> After completing clinical documentation, you can proceed to create a diagnosis
+                and prescription.
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary btn-lg">💾 Save Clinical Notes</button>
+                <a href="{% url 'patients:patient_detail' visit.patient.patient_id %}"
+                    class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

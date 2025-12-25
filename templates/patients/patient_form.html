@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_update %}Edit{% else %}Register{% endif %} Patient - Galbose Hospital{% endblock %}
+{% block page_title %}{% if is_update %}Edit Patient{% else %}Register New Patient{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">{% if is_update %}Edit Patient Information{% else %}Patient Registration Form{% endif %}
+        </h3>
+        <a href="{% if is_update %}{% url 'patients:patient_detail' patient.patient_id %}{% else %}{% url 'patients:patient_list' %}{% endif %}"
+            class="btn btn-secondary">
+            ← Back
+        </a>
+    </div>
+
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Personal Information -->
+            <h4 style="margin-bottom: 1rem; color: var(--primary);">Personal Information</h4>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label class="form-label">First Name *</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Middle Name</label>
+                    {{ form.middle_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name *</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date of Birth *</label>
+                    {{ form.date_of_birth }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gender *</label>
+                    {{ form.gender }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Blood Group</label>
+                    {{ form.blood_group }}
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <h4 style="margin-bottom: 1rem; color: var(--primary);">Contact Information</h4>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label class="form-label">Phone *</label>
+                    {{ form.phone }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    {{ form.email }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Country *</label>
+                    {{ form.country }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">State *</label>
+                    {{ form.state }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">City</label>
+                    {{ form.city }}
+                </div>
+                <div class="form-group" id="lga-field">
+                    <label class="form-label">LGA (Nigeria only)</label>
+                    {{ form.lga }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Address *</label>
+                {{ form.address }}
+            </div>
+
+            <!-- Emergency Contact -->
+            <h4 style="margin-bottom: 1rem; color: var(--primary); margin-top: 2rem;">Emergency Contact</h4>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label class="form-label">Contact Name *</label>
+                    {{ form.emergency_contact_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Phone *</label>
+                    {{ form.emergency_contact_phone }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Relationship *</label>
+                    {{ form.emergency_contact_relationship }}
+                </div>
+            </div>
+
+            <!-- Medical Information -->
+            <h4 style="margin-bottom: 1rem; color: var(--primary); margin-top: 2rem;">Medical Information</h4>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label class="form-label">Allergies</label>
+                    {{ form.allergies }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Chronic Conditions</label>
+                    {{ form.chronic_conditions }}
+                </div>
+            </div>
+
+            <!-- Photo -->
+            <div class="form-group">
+                <label class="form-label">Patient Photo</label>
+                {{ form.photo }}
+            </div>
+
+            <!-- Submit Buttons -->
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    {% if is_update %}Update Patient{% else %}Register Patient{% endif %}
+                </button>
+                <a href="{% if is_update %}{% url 'patients:patient_detail' patient.patient_id %}{% else %}{% url 'patients:patient_list' %}{% endif %}"
+                    class="btn btn-secondary btn-lg">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // States by country data
+    const statesByCountry = {
+        'Cameroon': [
+            'Adamawa', 'Centre', 'East', 'Far North', 'Littoral',
+            'North', 'Northwest', 'South', 'Southwest', 'West'
+        ],
+        'Senegal': [
+            'Dakar', 'Diourbel', 'Fatick', 'Kaffrine', 'Kaolack',
+            'Kédougou', 'Kolda', 'Louga', 'Matam', 'Saint-Louis',
+            'Sédhiou', 'Tambacounda', 'Thiès', 'Ziguinchor'
+        ],
+        'Gabon': [
+            'Estuaire', 'Haut-Ogooué', 'Moyen-Ogooué', 'Ngounié',
+            'Nyanga', 'Ogooué-Ivindo', 'Ogooué-Lolo', 'Ogooué-Maritime',
+            'Woleu-Ntem'
+        ],
+        'Nigeria': [
+            'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa',
+            'Benue', 'Borno', 'Cross River', 'Delta', 'Ebonyi', 'Edo',
+            'Ekiti', 'Enugu', 'FCT', 'Gombe', 'Imo', 'Jigawa', 'Kaduna',
+            'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara', 'Lagos', 'Nasarawa',
+            'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers',
+            'Sokoto', 'Taraba', 'Yobe', 'Zamfara'
+        ],
+        'Niger': [
+            'Agadez', 'Diffa', 'Dosso', 'Maradi', 'Niamey',
+            'Tahoua', 'Tillabéri', 'Zinder'
+        ],
+        'Ghana': [
+            'Ahafo', 'Ashanti', 'Bono', 'Bono East', 'Central',
+            'Eastern', 'Greater Accra', 'North East', 'Northern',
+            'Oti', 'Savannah', 'Upper East', 'Upper West', 'Volta',
+            'Western', 'Western North'
+        ]
+    };
+
+    // Get form elements
+    const countrySelect = document.getElementById('id_country');
+    const stateSelect = document.getElementById('id_state');
+    const lgaField = document.getElementById('lga-field');
+    const lgaSelect = document.getElementById('id_lga');
+
+    // Function to update state dropdown based on country
+    function updateStates() {
+        const selectedCountry = countrySelect.value;
+        const currentState = stateSelect.value;
+
+        // Clear existing options
+        stateSelect.innerHTML = '<option value="">---------</option>';
+
+        // Populate states for selected country
+        if (selectedCountry && statesByCountry[selectedCountry]) {
+            statesByCountry[selectedCountry].forEach(state => {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state;
+                // Preserve selected state if it exists in the new list
+                if (state === currentState) {
+                    option.selected = true;
+                }
+                stateSelect.appendChild(option);
+            });
+        }
+
+        // Show/hide LGA field based on country
+        if (selectedCountry === 'Nigeria') {
+            lgaField.style.display = 'block';
+        } else {
+            lgaField.style.display = 'none';
+            lgaSelect.value = '';  // Clear LGA value for non-Nigeria countries
+        }
+    }
+
+    // Add event listener to country dropdown
+    if (countrySelect) {
+        countrySelect.addEventListener('change', updateStates);
+
+        // Initialize on page load
+        updateStates();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoices - Galbose Hospital{% endblock %}
+{% block page_title %}Billing & Invoices{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Invoice Management</h3>
+        <a href="{% url 'billing:invoice_create' %}" class="btn btn-primary">💰 Create Invoice</a>
+    </div>
+
+    <div class="card-body">
+        <!-- Filters -->
+        <form method="get" class="mb-2">
+            <div class="flex gap-1">
+                <select name="status" class="form-control" style="max-width: 200px;">
+                    <option value="">All Statuses</option>
+                    <option value="unpaid" {% if status_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
+                    <option value="partial" {% if status_filter == 'partial' %}selected{% endif %}>Partial</option>
+                    <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Filter</button>
+                {% if status_filter %}
+                <a href="{% url 'billing:invoice_list' %}" class="btn btn-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Invoices Table -->
+        {% if invoices %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Patient</th>
+                        <th>Issue Date</th>
+                        <th>Due Date</th>
+                        <th>Total Amount</th>
+                        <th>Amount Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td><strong>{{ invoice.invoice_number }}</strong></td>
+                        <td>
+                            <a href="{% url 'patients:patient_detail' invoice.patient.patient_id %}">
+                                {{ invoice.patient.get_full_name }}
+                            </a>
+                        </td>
+                        <td>{{ invoice.issue_date|date:"M d, Y" }}</td>
+                        <td>{{ invoice.due_date|date:"M d, Y" }}</td>
+                        <td>₦{{ invoice.total|floatformat:2 }}</td>
+                        <td>₦{{ invoice.amount_paid|floatformat:2 }}</td>
+                        <td><strong>₦{{ invoice.balance_due|floatformat:2 }}</strong></td>
+                        <td>
+                            <span
+                                class="badge badge-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'partial' %}warning{% else %}danger{% endif %}">
+                                {{ invoice.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'billing:invoice_detail' invoice.invoice_number %}"
+                                class="btn btn-sm btn-primary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No invoices found. Click "Create Invoice" to generate one.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

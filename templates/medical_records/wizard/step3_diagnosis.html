@@ -1,0 +1,94 @@
+{% extends 'medical_records/wizard/base_wizard.html' %}
+
+{% block wizard_content %}
+<h4 style="color: #667eea; margin-bottom: 1.5rem;">🩺 Step 3: Diagnosis</h4>
+
+<!-- Clinical Summary -->
+<div class="alert alert-info" style="margin-bottom: 1.5rem;">
+    <strong>Clinical Summary:</strong><br>
+    {% if visit.presenting_complaint %}
+    <strong>Chief Complaint:</strong> {{ visit.presenting_complaint|truncatewords:15 }}<br>
+    {% endif %}
+    {% if visit.examination_findings %}
+    <strong>Examination:</strong> {{ visit.examination_findings|truncatewords:15 }}<br>
+    {% endif %}
+    {% if visit.has_vital_signs %}
+    <strong>Vitals:</strong>
+    {% if visit.temperature %}Temp: {{ visit.temperature }}°C{% endif %}
+    {% if visit.get_blood_pressure %} | BP: {{ visit.get_blood_pressure }}{% endif %}
+    {% if visit.pulse_rate %} | Pulse: {{ visit.pulse_rate }} bpm{% endif %}
+    {% endif %}
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+        <div class="form-group">
+            <label class="form-label">Patient *</label>
+            {{ form.patient }}
+            {% if form.patient.errors %}
+            <div class="text-danger">{{ form.patient.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label class="form-label">Doctor *</label>
+            {{ form.doctor }}
+            {% if form.doctor.errors %}
+            <div class="text-danger">{{ form.doctor.errors }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem;">
+        <div class="form-group">
+            <label class="form-label">ICD-10 Code</label>
+            {{ form.diagnosis_code }}
+            <small class="text-muted">Optional</small>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Diagnosis Name *</label>
+            {{ form.diagnosis_name }}
+            {% if form.diagnosis_name.errors %}
+            <div class="text-danger">{{ form.diagnosis_name.errors }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Description *</label>
+        {{ form.description }}
+        <small class="text-muted">Detailed diagnosis description</small>
+        {% if form.description.errors %}
+        <div class="text-danger">{{ form.description.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Treatment Plan *</label>
+        {{ form.treatment_plan }}
+        <small class="text-muted">Recommended treatment and management plan</small>
+        {% if form.treatment_plan.errors %}
+        <div class="text-danger">{{ form.treatment_plan.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Follow-up Date</label>
+        {{ form.follow_up_date }}
+        <small class="text-muted">Optional</small>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div
+        style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #e9ecef;">
+        <a href="{% url 'medical_records:prescription_wizard_step' patient.patient_id 2 %}"
+            class="btn btn-secondary btn-lg">
+            ← Previous: Clinical Notes
+        </a>
+        <button type="submit" class="btn btn-success btn-lg" style="min-width: 150px;">
+            Next: Prescription →
+        </button>
+    </div>
+</form>
+{% endblock %}
