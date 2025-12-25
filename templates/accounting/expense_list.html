@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Expense List{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-shopping-cart"></i> Expense List</h2>
+        <a href="{% url 'accounting:expense_record' %}" class="btn btn-danger">
+            <i class="fas fa-plus-circle"></i> Record New Expense
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Expense ID</th>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.expense_id }}</td>
+                            <td>{{ expense.expense_date|date:"Y-m-d H:i" }}</td>
+                            <td>{{ expense.get_category_display }}</td>
+                            <td>{{ expense.description|truncatewords:10 }}</td>
+                            <td>₦{{ expense.amount|floatformat:2 }}</td>
+                            <td><span class="badge badge-secondary">{{ expense.get_payment_method_display }}</span></td>
+                            <td>
+                                {% if expense.is_approved %}
+                                <span class="badge badge-success">Approved</span>
+                                {% else %}
+                                <span class="badge badge-warning">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not expense.is_approved %}
+                                <a href="{% url 'accounting:expense_approve' expense.pk %}"
+                                    class="btn btn-sm btn-success">
+                                    <i class="fas fa-check"></i> Approve
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No expenses found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

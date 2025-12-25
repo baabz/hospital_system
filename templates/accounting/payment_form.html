@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="fas fa-money-bill-wave"></i> {{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.payment_date.id_for_label }}">Payment Date & Time *</label>
+                                    {{ form.payment_date }}
+                                    {% if form.payment_date.errors %}
+                                    <div class="text-danger">{{ form.payment_date.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.amount.id_for_label }}">Amount (₦) *</label>
+                                    {{ form.amount }}
+                                    {% if form.amount.errors %}
+                                    <div class="text-danger">{{ form.amount.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.payment_method.id_for_label }}">Payment Method *</label>
+                                    {{ form.payment_method }}
+                                    {% if form.payment_method.errors %}
+                                    <div class="text-danger">{{ form.payment_method.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.payment_type.id_for_label }}">Payment Type *</label>
+                                    {{ form.payment_type }}
+                                    {% if form.payment_type.errors %}
+                                    <div class="text-danger">{{ form.payment_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.patient.id_for_label }}">Patient (Optional)</label>
+                                    {{ form.patient }}
+                                    {% if form.patient.errors %}
+                                    <div class="text-danger">{{ form.patient.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.invoice.id_for_label }}">Invoice (Optional)</label>
+                                    {{ form.invoice }}
+                                    {% if form.invoice.errors %}
+                                    <div class="text-danger">{{ form.invoice.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.reference_number.id_for_label }}">Reference Number</label>
+                            {{ form.reference_number }}
+                            <small class="form-text text-muted">Bank reference, POS receipt number, etc.</small>
+                            {% if form.reference_number.errors %}
+                            <div class="text-danger">{{ form.reference_number.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.notes.id_for_label }}">Notes</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                            <div class="text-danger">{{ form.notes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Record Payment
+                            </button>
+                            <a href="{% url 'accounting:dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
